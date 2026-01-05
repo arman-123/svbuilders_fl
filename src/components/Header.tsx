@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const navItems = [
-  { label: "HOME", href: "#" },
+  { label: "HOME", href: "/" },
   { label: "ABOUT US", href: "#about" },
   { label: "SERVICES", href: "#services" },
-  { label: "PROJECTS", href: "#work" },
+  { label: "PROJECTS", href: "/Projects" },
 ];
 
 const Header = () => {
