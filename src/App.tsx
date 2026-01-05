@@ -27,7 +27,7 @@ const App = () => (
 
             {/* Projects with Header & Footer */}
             <Route
-              path="/Projects"
+              path="/projects"
               element={
                 <>
                   <Header />
