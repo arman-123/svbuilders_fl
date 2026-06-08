@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ArrowUpRight, X, CheckCircle2 } from "lucide-react";
+import Reveal from "@/components/Reveal";
+import { useTouchDevice } from "@/hooks/use-touch-device";
 
 const services = [
   {
@@ -112,228 +114,239 @@ const services = [
   },
 ];
 
-const Services = () => {
-  const [hoveredId, setHoveredId] = useState<number | null>(null);
-  const [selectedService, setSelectedService] = useState<typeof services[0] | null>(
-    null
-  );
+export default function Services() {
+  const [selected, setSelected] = useState<(typeof services)[0] | null>(null);
+  const [tappedId, setTappedId] = useState<number | null>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const spotlightRef = useRef<HTMLDivElement>(null);
+  const isTouch = useTouchDevice();
+
+  /* ── Spotlight — mouse (desktop) + touch (mobile) ── */
+  useEffect(() => {
+    const section = sectionRef.current;
+    const spotlight = spotlightRef.current;
+    if (!section || !spotlight) return;
+
+    let tx = 0, ty = 0, cx = 0, cy = 0, rafId = 0, active = false;
+
+    const updatePos = (clientX: number, clientY: number) => {
+      const r = section.getBoundingClientRect();
+      tx = clientX - r.left;
+      ty = clientY - r.top;
+      if (!active) { active = true; spotlight.style.opacity = "1"; }
+    };
+
+    const onMove  = (e: MouseEvent)  => updatePos(e.clientX, e.clientY);
+    const onTouch = (e: TouchEvent)  => updatePos(e.touches[0].clientX, e.touches[0].clientY);
+    const onLeave = () => { active = false; spotlight.style.opacity = "0"; };
+
+    const tick = () => {
+      cx += (tx - cx) * 0.07;
+      cy += (ty - cy) * 0.07;
+      spotlight.style.background = `radial-gradient(650px circle at ${cx}px ${cy}px, rgba(71,55,39,0.10) 0%, transparent 65%)`;
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+
+    section.addEventListener("mousemove", onMove);
+    section.addEventListener("mouseleave", onLeave);
+    section.addEventListener("touchmove", onTouch, { passive: true });
+    return () => {
+      cancelAnimationFrame(rafId);
+      section.removeEventListener("mousemove", onMove);
+      section.removeEventListener("mouseleave", onLeave);
+      section.removeEventListener("touchmove", onTouch);
+    };
+  }, []);
 
   return (
-   <section id="services" className="py-16 sm:py-20 md:py-24 lg:py-32 bg-secondary">
-  <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-    {/* Section Header */}
-    <div className="text-center mb-12 sm:mb-16 lg:mb-20">
-      <span className="inline-block text-[#473727] text-xs sm:text-sm tracking-[0.2em] uppercase mb-3 sm:mb-4">
-        What We Offer
+    <section
+      ref={sectionRef}
+      id="services"
+      className="relative py-24 sm:py-32 lg:py-40 bg-[#e8e0d4] overflow-hidden"
+    >
+      {/* Mouse spotlight */}
+      <div
+        ref={spotlightRef}
+        className="absolute inset-0 pointer-events-none z-0"
+        style={{ opacity: 0, transition: "opacity 0.5s ease" }}
+      />
+
+      {/* Background watermark */}
+      <span className="pointer-events-none absolute top-0 left-0 font-heading text-[20vw] leading-none text-[#473727]/[0.05] select-none">
+        Services
       </span>
 
-      <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-foreground mb-4 sm:mb-6">
-        Our Services
-      </h2>
-      <div className="w-16 sm:w-20 h-px bg-[#473727] mx-auto mb-4 sm:mb-6" />
+      <div className="container mx-auto px-5 sm:px-8 lg:px-10">
 
-      {/* Paragraph updated */}
-      <p className="text-muted-foreground text-sm sm:text-base md:text-lg max-w-2xl mx-auto px-4 font-libre">
-        Comprehensive construction and real estate solutions tailored to bring your vision to life
-      </p>
-    </div>
-
-    {/* Services Grid */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-      {services.map((service, index) => (
-        <div
-          key={service.id}
-          className="group relative overflow-hidden rounded-xl sm:rounded-2xl bg-card shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer"
-          onMouseEnter={() => setHoveredId(service.id)}
-          onMouseLeave={() => setHoveredId(null)}
-          onClick={() => setSelectedService(service)}
-          style={{
-            animationDelay: `${index * 100}ms`,
-          }}
-        >
-          {/* Image Container */}
-          <div className="relative h-48 sm:h-56 md:h-64 lg:h-72 overflow-hidden">
-            <img
-              src={service.image}
-              alt={service.title}
-              className={`w-full h-full object-cover transition-transform duration-700 ${
-                hoveredId === service.id ? "scale-110" : "scale-100"
-              }`}
-            />
-
-            <div
-              className={`absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/40 to-transparent transition-opacity duration-500 ${
-                hoveredId === service.id ? "opacity-100" : "opacity-70"
-              }`}
-            />
-
-            {/* Number Badge */}
-            <div className="absolute top-3 sm:top-4 left-3 sm:left-4 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#473727]/20 backdrop-blur-sm border border-[#473727]/30 flex items-center justify-center">
-              <span className="text-[#473727] font-heading text-sm sm:text-base font-semibold">
-                {String(service.id).padStart(2, "0")}
-              </span>
-            </div>
-
-            {/* Arrow Icon */}
-            <div
-              className={`absolute top-3 sm:top-4 right-3 sm:right-4 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#473727] flex items-center justify-center transition-all duration-500 ${
-                hoveredId === service.id
-                  ? "opacity-100 translate-x-0"
-                  : "opacity-0 translate-x-4"
-              }`}
-            >
-              <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="p-4 sm:p-5 md:p-6">
-            <h3 className="font-heading text-lg sm:text-xl md:text-2xl text-foreground mb-2 sm:mb-3 group-hover:text-[#473727] transition-colors duration-300">
-              {service.title}
-            </h3>
-
-            {/* Paragraph updated */}
-            <p className="text-muted-foreground text-xs sm:text-sm md:text-base leading-relaxed line-clamp-3 font-libre">
-              {service.description}
-            </p>
-
-            <div
-              className={`mt-3 sm:mt-4 flex items-center gap-2 text-[#473727] text-xs sm:text-sm font-medium transition-all duration-500 ${
-                hoveredId === service.id
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-2"
-              }`}
-            >
-              <span>Learn More</span>
-              <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4" />
-            </div>
-          </div>
+        {/* Header */}
+        <div className="mb-20 sm:mb-24 lg:mb-28">
+          <Reveal>
+            <p className="section-label text-[#5C3718]/60 mb-5 font-body">What We Offer</p>
+          </Reveal>
+          <Reveal delay={80}>
+            <h2 className="font-display text-6xl sm:text-7xl lg:text-8xl text-[#1C0D07] leading-[1.02]">
+              Our
+              <br />
+              <span className="italic font-normal text-[#BE9234]">Services</span>
+            </h2>
+          </Reveal>
         </div>
-      ))}
-    </div>
 
-    {/* CTA */}
-    <div className="text-center mt-12 sm:mt-16 lg:mt-20">
-      <a
-        href="#contact"
-        className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-[#473727] text-white font-medium text-sm sm:text-base hover:bg-[#5a402b] transition-all duration-300 hover:shadow-lg hover:shadow-[#473727]/25"
-      >
-        Discuss Your Project
-        <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5" />
-      </a>
-    </div>
-  </div>
-
-  {/* Modal Popup */}
-  {selectedService && (
-    <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300"
-      onClick={() => setSelectedService(null)}
-    >
-      <div
-        className="bg-card rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in-95 duration-300"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Close Button */}
-        <button
-          onClick={() => setSelectedService(null)}
-          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-primary/80 backdrop-blur-sm hover:bg-primary flex items-center justify-center transition-all duration-300 hover:rotate-90 z-10"
-        >
-          <X className="w-5 h-5 text-[#473727]" />
-        </button>
-
-        {/* Image Section */}
-        <div className="relative h-64 sm:h-80 md:h-96 overflow-hidden rounded-t-2xl">
-          <img
-            src={selectedService.image}
-            alt={selectedService.title}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/40 to-transparent" />
-
-          <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-full bg-[#473727]/20 backdrop-blur-sm border border-[#473727]/30 flex items-center justify-center">
-                <span className="text-[#473727] font-heading text-lg font-semibold">
-                  {String(selectedService.id).padStart(2, "0")}
+        {/* Editorial service list */}
+        <div className="divide-y divide-[#473727]/12">
+          {services.map((service, index) => (
+            <Reveal key={service.id} delay={index * 50}>
+              <div
+                className="group relative py-7 sm:py-8 flex items-start sm:items-center justify-between gap-6 cursor-pointer"
+                onClick={() => {
+                  if (isTouch) {
+                    if (tappedId === service.id) {
+                      // second tap → open modal
+                      setSelected(service);
+                      setTappedId(null);
+                    } else {
+                      // first tap → reveal description + snap spotlight
+                      setTappedId(service.id);
+                      const el = sectionRef.current?.querySelector(`[data-sid="${service.id}"]`) as HTMLElement;
+                      if (el && spotlightRef.current) {
+                        const r = sectionRef.current!.getBoundingClientRect();
+                        const er = el.getBoundingClientRect();
+                        const cx = er.left + er.width / 2 - r.left;
+                        const cy = er.top  + er.height / 2 - r.top;
+                        spotlightRef.current.style.opacity = "1";
+                        spotlightRef.current.style.background = `radial-gradient(650px circle at ${cx}px ${cy}px, rgba(71,55,39,0.10) 0%, transparent 65%)`;
+                      }
+                    }
+                  } else {
+                    setSelected(service);
+                  }
+                }}
+                data-sid={service.id}
+              >
+                {/* Index */}
+                <span className="font-heading text-[0.72rem] text-[#5C3718]/35 tracking-widest w-10 flex-shrink-0 pt-1 sm:pt-0 group-hover:text-[#5C3718]/55 transition-colors duration-500">
+                  {String(service.id).padStart(2, "0")}
                 </span>
+
+                {/* Title */}
+                <h3 className="font-heading text-2xl sm:text-3xl lg:text-4xl text-[#3D1F0E]/80 flex-1 transition-all duration-500 group-hover:text-[#1C0D07] group-hover:translate-x-2">
+                  {service.title}
+                </h3>
+
+                {/* Description — always visible on desktop; revealed on first tap on mobile */}
+                <p
+                  className="text-[#5C3718]/60 text-sm font-libre leading-relaxed max-w-xs transition-all duration-500 group-hover:text-[#3D1F0E]/70"
+                  style={{
+                    display: isTouch ? (tappedId === service.id ? "block" : "none") : undefined,
+                  }}
+                  // on desktop keep the existing hidden lg:block class
+                  {...(!isTouch && { className: "text-[#5C3718]/60 text-sm font-libre leading-relaxed max-w-xs hidden lg:block transition-colors duration-500 group-hover:text-[#3D1F0E]/70" })}
+                >
+                  {service.description}
+                </p>
+
+                {/* Arrow */}
+                <div className="flex-shrink-0 w-9 h-9 border border-[#473727]/20 flex items-center justify-center transition-all duration-500 group-hover:bg-[#473727] group-hover:border-[#473727]">
+                  <ArrowUpRight className="w-4 h-4 text-[#5C3718]/55 group-hover:text-[#E8DCC8] transition-colors duration-500" />
+                </div>
               </div>
-              <h3 className="font-heading text-3xl sm:text-4xl md:text-5xl text-white">
-                {selectedService.title}
-              </h3>
-            </div>
-          </div>
+            </Reveal>
+          ))}
         </div>
 
-        {/* Content Section */}
-        <div className="p-6 sm:p-8 md:p-10">
-          {/* Description */}
-          <div className="mb-8">
-            <h4 className="font-heading text-xl sm:text-2xl text-foreground mb-4 flex items-center gap-2">
-              <div className="w-1 h-6 bg-[#473727] rounded-full" />
-              Overview
-            </h4>
-
-            {/* Paragraph updated */}
-            <p className="text-muted-foreground text-base sm:text-lg leading-relaxed font-libre">
-              {selectedService.fullDescription}
-            </p>
-          </div>
-
-          {/* Key Points */}
-          <div>
-            <h4 className="font-heading text-xl sm:text-2xl text-foreground mb-6 flex items-center gap-2">
-              <div className="w-1 h-6 bg-[#473727] rounded-full" />
-              Key Features
-            </h4>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {selectedService.keyPoints.map((point, index) => (
-                <div
-                  key={index}
-                  className="flex items-start gap-3 p-4 rounded-xl bg-secondary/50 hover:bg-secondary transition-all duration-300 group"
-                  style={{
-                    animationDelay: `${index * 50}ms`,
-                  }}
-                >
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#473727]/10 flex items-center justify-center mt-0.5 group-hover:bg-[#473727]/20 transition-colors">
-                    <CheckCircle2 className="w-4 h-4 text-[#473727]" />
-                  </div>
-
-                  {/* Paragraph updated */}
-                  <p className="text-muted-foreground text-sm sm:text-base leading-relaxed font-libre">
-                    {point}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* CTA */}
-          <div className="mt-8 pt-6 border-t border-border flex flex-col sm:flex-row gap-4 justify-center">
+        {/* CTA */}
+        <div className="mt-16 sm:mt-20">
+          <Reveal>
             <a
-              href="#contact"
-              onClick={() => setSelectedService(null)}
-              className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#473727] text-white font-medium text-base hover:bg-[#5a402b] transition-all duration-300 hover:shadow-lg hover:shadow-[#473727]/25"
+              href="/#contact"
+              className="btn-fill inline-flex items-center gap-2.5 px-9 py-4 bg-[#473727] text-[#E8DCC8] font-body font-medium text-[0.7rem] tracking-[0.2em] uppercase"
             >
-              Get Started
-              <ArrowUpRight className="w-5 h-5" />
+              Discuss Your Project
+              <ArrowUpRight className="w-4 h-4" />
             </a>
-
-            <button
-              onClick={() => setSelectedService(null)}
-              className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-secondary text-foreground font-medium text-base hover:bg-secondary/80 transition-all duration-300"
-            >
-              Close
-            </button>
-          </div>
+          </Reveal>
         </div>
       </div>
-    </div>
-  )}
-</section>
 
+      {/* Modal */}
+      {selected && (
+        <div
+          className="fixed inset-0 bg-[#0a0906]/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 sm:p-6 animate-fade-in"
+          onClick={() => setSelected(null)}
+        >
+          <div
+            data-lenis-prevent
+            className="relative bg-[#faf8f5] max-w-4xl w-full max-h-[90vh] overflow-y-auto overscroll-contain shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close */}
+            <button
+              onClick={() => setSelected(null)}
+              className="absolute top-4 right-4 w-10 h-10 bg-[#E8DCC8] hover:bg-[#d5c9b0] flex items-center justify-center transition-all duration-300 z-10"
+            >
+              <X className="w-4 h-4 text-[#473727]" />
+            </button>
+
+            {/* Image */}
+            <div className="relative h-56 sm:h-72 md:h-88 overflow-hidden">
+              <img
+                src={selected.image}
+                alt={selected.title}
+                className="w-full h-full object-cover animate-ken-burns"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0906]/90 via-[#0a0906]/40 to-transparent" />
+              <div className="absolute bottom-0 left-0 p-7 sm:p-9">
+                <span className="font-heading text-6xl text-[#5C3718]/25 leading-none">
+                  {String(selected.id).padStart(2, "0")}
+                </span>
+                <h3 className="font-heading text-3xl sm:text-4xl text-[#1C0D07] mt-1">
+                  {selected.title}
+                </h3>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-7 sm:p-9 md:p-11">
+              <div className="mb-8">
+                <p className="section-label text-[#473727]/50 mb-4 font-body">Overview</p>
+                <p className="text-[#3a3028]/70 text-base sm:text-lg leading-[1.85] font-libre">
+                  {selected.fullDescription}
+                </p>
+              </div>
+
+              <div>
+                <p className="section-label text-[#473727]/50 mb-5 font-body">Key Features</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {selected.keyPoints.map((point, i) => (
+                    <div key={i} className="flex items-start gap-3 p-4 bg-[#f0ebe3] hover:bg-[#e8e0d4] transition-colors duration-300">
+                      <CheckCircle2 className="w-4 h-4 text-[#473727] flex-shrink-0 mt-0.5" />
+                      <p className="text-[#3a3028]/75 text-sm leading-relaxed font-libre">{point}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-9 pt-7 border-t border-[#473727]/10 flex flex-col sm:flex-row gap-3 justify-center">
+                <a
+                  href="/#contact"
+                  onClick={() => setSelected(null)}
+                  className="btn-fill inline-flex items-center justify-center gap-2 px-9 py-4 bg-[#473727] text-[#E8DCC8] font-body font-medium text-[0.7rem] tracking-[0.18em] uppercase"
+                >
+                  Get Started
+                  <ArrowUpRight className="w-4 h-4" />
+                </a>
+                <button
+                  onClick={() => setSelected(null)}
+                  className="inline-flex items-center justify-center px-9 py-4 border border-[#473727]/20 text-[#473727]/70 hover:bg-[#473727]/06 font-body font-medium text-[0.7rem] tracking-[0.18em] uppercase transition-all duration-300"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
   );
-};
-
-export default Services;
+}

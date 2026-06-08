@@ -6,26 +6,32 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 
 import Index from "./pages/Index";
+import Aurora from "./pages/Aurora";
 import NotFound from "./pages/NotFound";
 import Projects from "./components/Projects";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ShaderCursor from "@/components/ShaderCursor";
+import GrainOverlay from "@/components/GrainOverlay";
+import { useLenis } from "@/hooks/use-lenis";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <HelmetProvider>
-    <QueryClientProvider client={queryClient}>
+function AppInner() {
+  useLenis();
+
+  return (
+    <HelmetProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <GrainOverlay />
+        <ShaderCursor />
 
         <BrowserRouter>
           <Routes>
-            {/* Home */}
             <Route path="/" element={<Index />} />
-
-            {/* Projects with Header & Footer */}
+            <Route path="/aurora" element={<Aurora />} />
             <Route
               path="/projects"
               element={
@@ -36,15 +42,18 @@ const App = () => (
                 </>
               }
             />
-
-            {/* 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
-
       </TooltipProvider>
-    </QueryClientProvider>
-  </HelmetProvider>
+    </HelmetProvider>
+  );
+}
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <AppInner />
+  </QueryClientProvider>
 );
 
 export default App;

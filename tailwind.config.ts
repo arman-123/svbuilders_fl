@@ -13,9 +13,17 @@ export default {
       },
     },
     extend: {
+      scale: {
+        "108": "1.08",
+        "102": "1.02",
+      },
       fontFamily: {
-        heading: ['Playfair Display', 'serif'],
+        heading: ['DM Serif Display', 'Playfair Display', 'serif'],
+        display: ['Playfair Display', 'serif'],
+        playfair: ['Playfair Display', 'serif'],
+        bodoni: ['Bodoni Moda', 'Cormorant Garamond', 'serif'],
         body: ['Inter', 'sans-serif'],
+        mono: ['DM Mono', 'monospace'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -56,6 +64,12 @@ export default {
           light: "hsl(var(--gold-light))",
         },
         cream: "hsl(var(--cream))",
+        /* SV brand */
+        sv: {
+          brown: "hsl(var(--sv-brown))",
+          "brown-light": "hsl(var(--sv-brown-light))",
+          cream: "hsl(var(--sv-cream))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -71,6 +85,10 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      transitionTimingFunction: {
+        lux: "cubic-bezier(0.16, 1, 0.3, 1)",
+        smooth: "cubic-bezier(0.65, 0.05, 0.36, 1)",
       },
       keyframes: {
         "accordion-down": {
@@ -97,6 +115,10 @@ export default {
           "0%": { opacity: "0", transform: "scale(1.1)" },
           "100%": { opacity: "1", transform: "scale(1)" },
         },
+        "mask-up": {
+          "0%": { transform: "translateY(105%)" },
+          "100%": { transform: "translateY(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -105,6 +127,7 @@ export default {
         "fade-in-up": "fade-in-up 1s ease-out forwards",
         "slide-down": "slide-down 0.5s ease-out forwards",
         "scale-in": "scale-in 1.5s ease-out forwards",
+        "mask-up": "mask-up 0.9s cubic-bezier(0.16,1,0.3,1) forwards",
       },
     },
   },

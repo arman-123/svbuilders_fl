@@ -2,158 +2,297 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const navItems = [
-  { label: "HOME", href: "/" },
-  { label: "ABOUT US", href: "#about" },
-  { label: "SERVICES", href: "#services" },
-  { label: "PROJECTS", href: "/projects" },
+  { label: "Home",     href: "/" },
+  { label: "About",    href: "/#about" },
+  { label: "Services", href: "/#services" },
+  { label: "Projects", href: "/projects" },
+  { label: "Contact",  href: "/#contact" },
 ];
 
-const Header = () => {
-  const [isOpen, setIsOpen] = useState(false);
+export default function Header() {
+  const [isOpen, setIsOpen]       = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mounted, setMounted]     = useState(false);
 
-  // Detect scroll
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const t = setTimeout(() => setMounted(true), 200);
+    return () => clearTimeout(t);
   }, []);
 
-  // Close menu on resize
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        setIsOpen(false);
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    const onScroll = () => setIsScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Prevent body scroll when menu is open
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
+    if (window.innerWidth >= 1024) setIsOpen(false);
+    const onResize = () => { if (window.innerWidth >= 1024) setIsOpen(false); };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
   }, [isOpen]);
 
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          isScrolled
-            ? "bg-[#E8DCC8]/95 backdrop-blur-md py-2 sm:py-2 shadow-lg"
-            : "bg-transparent py-3 sm:py-5"
-        }`}
+        style={{
+          position: "fixed",
+          top: 0, left: 0, right: 0,
+          zIndex: 50,
+          transition: "background 0.6s ease, padding 0.5s ease, border-color 0.6s ease",
+          padding: isScrolled ? "12px 0" : "20px 0",
+          background: isScrolled ? "rgba(252,250,245,0.92)" : "transparent",
+          backdropFilter: isScrolled ? "blur(14px)" : "none",
+          borderBottom: "1px solid",
+          borderColor: isScrolled ? "rgba(71,55,39,0.12)" : "transparent",
+        }}
       >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Link to="/" className="flex items-center group z-50">
-              <img 
-                src="https://i.ibb.co/Z6CBvxYn/SVLOGO.png" 
-                alt="SV Developers Logo" 
-                className="h-16 sm:h-20 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
-              />
-            </Link>
+        <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 clamp(1rem, 4vw, 40px)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
-              {navItems.map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  className={`nav-link ${
-                    isScrolled ? "text-black" : "text-cream"
-                  }`}
-                >
-                  {item.label}
-                </a>
-              ))}
-            </nav>
+          {/* Logo */}
+          <Link
+            to="/"
+            style={{
+              zIndex: 50,
+              opacity: mounted ? 1 : 0,
+              transform: mounted ? "none" : "translateY(-8px)",
+              transition: "opacity 0.7s ease, transform 0.7s ease",
+            }}
+          >
+            <img
+              src="https://i.ibb.co/Z6CBvxYn/SVLOGO.png"
+              alt="SV Developers"
+              style={{
+                height: isScrolled ? 48 : 54,
+                width: "auto",
+                objectFit: "contain",
+                filter: isScrolled
+                  ? "none"
+                  : "brightness(0) invert(1) opacity(0.88)",
+                transition: "height 0.5s ease, filter 0.6s ease",
+              }}
+            />
+          </Link>
 
-            {/* Contact Button - Desktop */}
-            <a
-  href="#contact"
-  className="hidden lg:inline-flex items-center gap-2 px-4 xl:px-5 py-2 xl:py-2.5 
-             bg-[#473727] text-white font-medium text-sm
-             hover:bg-[#6b4f33] transition-all duration-300 
-             hover:shadow-lg hover:shadow-gold/25"
->
-  Contact Us
-</a>
+          {/* Desktop nav — ultra minimal */}
+          <nav style={{ display: "none" }} className="lg:flex items-center gap-10 xl:gap-12">
+            {navItems.map((item, i) => (
+              <a
+                key={item.label}
+                href={item.href}
+                className="group"
+                style={{
+                  position: "relative",
+                  fontSize: "0.65rem",
+                  letterSpacing: "0.24em",
+                  textTransform: "uppercase",
+                  fontFamily: "var(--font-body, Inter, sans-serif)",
+                  fontWeight: 500,
+                  color: "rgba(71,55,39,0.55)",
+                  transition: "color 0.4s ease, opacity 0.7s ease, transform 0.7s ease",
+                  opacity: mounted ? 1 : 0,
+                  transform: mounted ? "none" : "translateY(-8px)",
+                  transitionDelay: `${100 + i * 60}ms`,
+                  textDecoration: "none",
+                }}
+                onMouseEnter={(e) =>
+                  ((e.target as HTMLElement).style.color = "rgba(71,55,39,1)")
+                }
+                onMouseLeave={(e) =>
+                  ((e.target as HTMLElement).style.color = "rgba(71,55,39,0.55)")
+                }
+              >
+                {item.label}
+                {/* underline reveal */}
+                <span
+                  style={{
+                    position: "absolute",
+                    bottom: -2,
+                    left: 0,
+                    width: "100%",
+                    height: 1,
+                    background: "rgba(71,55,39,0.30)",
+                    transformOrigin: "right",
+                    transform: "scaleX(0)",
+                    transition: "transform 0.4s cubic-bezier(0.16,1,0.3,1)",
+                  }}
+                  className="group-hover:[transform:scaleX(1)] group-hover:[transform-origin:left]"
+                />
+              </a>
+            ))}
+          </nav>
 
+          {/* CTA */}
+          <a
+            href="/#contact"
+            className="btn-fill hidden lg:inline-flex items-center"
+            style={{
+              padding: "10px 24px",
+              background: "#473727",
+              color: "#E8DCC8",
+              fontSize: "0.62rem",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              fontFamily: "var(--font-body, Inter, sans-serif)",
+              fontWeight: 500,
+              textDecoration: "none",
+              opacity: mounted ? 1 : 0,
+              transform: mounted ? "none" : "translateY(-8px)",
+              transition: "opacity 0.7s ease 500ms, transform 0.7s ease 500ms",
+            }}
+          >
+            Enquire
+          </a>
 
-            {/* Hamburger Menu - Mobile & Tablet */}
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className={`lg:hidden relative z-50 w-10 h-10 flex flex-col items-center justify-center gap-1.5 ${
-                isOpen ? "hamburger-open" : ""
-              }`}
-              aria-label="Toggle menu"
-            >
-              <span className={`hamburger-line ${isOpen ? "bg-foreground" : "bg-[#473727]"}`}></span>
-              <span className={`hamburger-line w-3 ${isOpen ? "bg-foreground" : "bg-[#473727]"}`}></span>
-              <span className={`hamburger-line ${isOpen ? "bg-foreground" : "bg-[#473727]"}`}></span>
-            </button>
-          </div>
+          {/* Hamburger */}
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="lg:hidden"
+            aria-label="Toggle menu"
+            style={{
+              position: "relative",
+              zIndex: 50,
+              width: 40,
+              height: 40,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 5,
+              background: "none",
+              border: "none",
+              cursor: "none",
+            }}
+          >
+            <span
+              style={{
+                display: "block",
+                height: 1,
+                width: 24,
+                background: "rgba(71,55,39,0.80)",
+                transition: "transform 0.3s ease, opacity 0.3s ease",
+                transform: isOpen ? "rotate(45deg) translateY(6px)" : "none",
+              }}
+            />
+            <span
+              style={{
+                display: "block",
+                height: 1,
+                width: 16,
+                background: "rgba(71,55,39,0.80)",
+                transition: "opacity 0.3s ease, transform 0.3s ease",
+                opacity: isOpen ? 0 : 1,
+                transform: isOpen ? "scaleX(0)" : "none",
+              }}
+            />
+            <span
+              style={{
+                display: "block",
+                height: 1,
+                width: 24,
+                background: "rgba(71,55,39,0.80)",
+                transition: "transform 0.3s ease",
+                transform: isOpen ? "rotate(-45deg) translateY(-6px)" : "none",
+              }}
+            />
+          </button>
         </div>
       </header>
 
-      {/* Mobile Menu - Full Screen Overlay */}
+      {/* Mobile overlay */}
       <div
-        className={`lg:hidden fixed inset-0 z-40 bg-background transition-all duration-500 ease-in-out ${
-          isOpen ? "opacity-100 visible" : "opacity-0 invisible"
-        }`}
+        className="lg:hidden"
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 40,
+          background: "#FCFAF5",
+          transition: "opacity 0.6s cubic-bezier(0.16,1,0.3,1), visibility 0.6s",
+          opacity: isOpen ? 1 : 0,
+          visibility: isOpen ? "visible" : "hidden",
+        }}
       >
-        <nav className="flex flex-col items-center justify-center h-full gap-6 sm:gap-8 px-4">
-          {navItems.map((item, index) => (
+        {/* Large watermark */}
+        <span
+          style={{
+            position: "absolute",
+            bottom: -20,
+            right: -8,
+            fontFamily: "Playfair Display, serif",
+            fontSize: "50vw",
+            lineHeight: 1,
+            color: "rgba(71,55,39,0.06)",
+            userSelect: "none",
+            pointerEvents: "none",
+          }}
+        >
+          SV
+        </span>
+
+        <nav
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100%",
+            gap: 6,
+            padding: 24,
+          }}
+        >
+          {navItems.map((item, i) => (
             <a
               key={item.label}
               href={item.href}
               onClick={() => setIsOpen(false)}
-              className={`text-foreground text-xl sm:text-2xl font-heading tracking-wide hover:text-gold transition-all duration-300 transform ${
-                isOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-              }`}
               style={{
-                transitionDelay: isOpen ? `${index * 100 + 200}ms` : "0ms",
+                fontFamily: "Playfair Display, serif",
+                fontSize: "clamp(2rem, 8vw, 3.5rem)",
+                color: "rgba(71,55,39,0.80)",
+                textDecoration: "none",
+                transition: `opacity 0.5s ease ${isOpen ? i * 70 + 200 : 0}ms, transform 0.5s ease ${isOpen ? i * 70 + 200 : 0}ms, color 0.3s ease`,
+                opacity: isOpen ? 1 : 0,
+                transform: isOpen ? "none" : "translateY(20px)",
               }}
+              onMouseEnter={(e) =>
+                ((e.target as HTMLElement).style.color = "rgba(71,55,39,1)")
+              }
+              onMouseLeave={(e) =>
+                ((e.target as HTMLElement).style.color = "rgba(71,55,39,0.80)")
+              }
             >
               {item.label}
             </a>
           ))}
-      <a
-  href="#contact"
-  onClick={() => setIsOpen(false)}
-  className={`mt-4 px-6 sm:px-8 py-2.5 sm:py-3 
-              bg-[#473727] text-white font-medium text-sm sm:text-base 
-              
-              hover:bg-[#6b4f33] 
-              transition-all duration-300 transform ${
-                isOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-              }`}
-  style={{
-    transitionDelay: isOpen
-      ? `${navItems.length * 100 + 200}ms`
-      : "0ms",
-  }}
->
-  Contact Us
-</a>
 
+          <a
+            href="/#contact"
+            onClick={() => setIsOpen(false)}
+            className="btn-fill"
+            style={{
+              marginTop: 24,
+              padding: "14px 36px",
+              background: "#473727",
+              color: "#E8DCC8",
+              fontSize: "0.65rem",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              fontFamily: "Inter, sans-serif",
+              fontWeight: 500,
+              textDecoration: "none",
+              transition: `opacity 0.5s ease ${isOpen ? navItems.length * 70 + 220 : 0}ms`,
+              opacity: isOpen ? 1 : 0,
+            }}
+          >
+            Get In Touch
+          </a>
         </nav>
       </div>
     </>
   );
-};
-
-export default Header;
+}

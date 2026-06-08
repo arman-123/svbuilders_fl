@@ -1,160 +1,155 @@
-import React from 'react';
-import { Building2, Phone, Mail, MapPin, Facebook, Instagram, Linkedin, Twitter, Youtube, ArrowRight, Clock } from 'lucide-react';
+import { Phone, Mail, MapPin, ArrowUpRight } from "lucide-react";
+import { useEffect, useRef } from "react";
+
+const quickLinks = [
+  { name: "Home", href: "/" },
+  { name: "About Us", href: "/#about" },
+  { name: "Services", href: "/#services" },
+  { name: "Projects", href: "/projects" },
+  { name: "Contact", href: "/#contact" },
+];
+
+const services = [
+  "Construction",
+  "Apartments",
+  "Townships",
+  "Layouts",
+  "Villas",
+  "Real Estate Marketing",
+];
 
 export default function Footer() {
-  const currentYear = new Date().getFullYear();
+  const year      = new Date().getFullYear();
+  const footerRef = useRef<HTMLElement>(null);
 
-  const services = [
-    'Construction',
-    'Apartments',
-    'Townships',
-    'Layouts',
-    'Villas',
-    'Real Estate Marketing'
-  ];
+  /* Touch delegation — adds .group-touch on touchstart, removes after 400ms */
+  useEffect(() => {
+    const footer = footerRef.current;
+    if (!footer) return;
+    let activeEl: HTMLElement | null = null;
 
-  const quickLinks = [
-    { name: 'Home', href: '#home' },
-    { name: 'About Us', href: '#about' },
-    { name: 'Services', href: '#services' },
-    { name: 'Projects', href: '#work' },
-    { name: 'Contact', href: '#contact' }
-  ];
+    const onStart = (e: TouchEvent) => {
+      const group = (e.target as HTMLElement).closest<HTMLElement>(".group");
+      if (!group) return;
+      if (activeEl && activeEl !== group) activeEl.classList.remove("group-touch");
+      group.classList.add("group-touch");
+      activeEl = group;
+    };
+    const onEnd = () => {
+      if (activeEl) {
+        const el = activeEl;
+        setTimeout(() => el.classList.remove("group-touch"), 400);
+        activeEl = null;
+      }
+    };
 
-  const socialLinks = [
-    { icon: Facebook, href: '#', label: 'Facebook' },
-    { icon: Instagram, href: '#', label: 'Instagram' },
-    { icon: Linkedin, href: '#', label: 'LinkedIn' },
-    { icon: Twitter, href: '#', label: 'Twitter' },
-    { icon: Youtube, href: '#', label: 'YouTube' }
-  ];
+    footer.addEventListener("touchstart", onStart, { passive: true });
+    footer.addEventListener("touchend",   onEnd,   { passive: true });
+    return () => {
+      footer.removeEventListener("touchstart", onStart);
+      footer.removeEventListener("touchend",   onEnd);
+    };
+  }, []);
 
   return (
-    <footer className="bg-[#473727] text-[#E8DCC8] relative overflow-hidden font-serif">
-      {/* Decorative Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0 " />
-      </div>
+    <footer ref={footerRef} className="relative bg-[#1C0D07] text-[#E8DCC8] overflow-hidden font-body">
+      {/* Watermark */}
+      <span className="pointer-events-none absolute -top-6 right-0 font-heading text-[26vw] leading-none text-[#E8DCC8]/[0.025] select-none">
+        SV
+      </span>
 
-      {/* Main Footer Content */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-          
-          {/* Company Info */}
+      {/* Top accent line */}
+      <div className="h-px bg-[#E8DCC8]/08" />
+
+      <div className="container mx-auto px-5 sm:px-8 lg:px-10 py-16 lg:py-20 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-10">
+
+          {/* Brand */}
           <div className="lg:col-span-1">
-            <div className="flex items-center space-x-3 mb-5">
-            <div className="w-24 h-24 flex items-center justify-center">
-            <img 
-                src="https://i.ibb.co/Z6CBvxYn/SVLOGO.png" 
-                alt="SV Developers Logo"
-                className="w-full h-full object-contain"
+            <img
+              src="https://i.ibb.co/Z6CBvxYn/SVLOGO.png"
+              alt="SV Developers"
+              className="h-16 w-auto object-contain mb-5"
+              style={{ filter: "brightness(0) invert(1) sepia(1) saturate(3) hue-rotate(-5deg) brightness(1.3)" }}
             />
-            </div>
-
-              <h3 className="text-xl font-bold text-[#E8DCC8]">SV Developers</h3>
-            </div>
-            <p className="text-[#E8DCC8]/80 mb-5 leading-relaxed text-sm">
-              Building dreams, creating landmarks, and delivering excellence in every square foot. Your trusted partner in real estate development.
+            <p className="text-[#E8DCC8]/35 text-sm leading-relaxed mb-6">
+              Building dreams, creating landmarks, and delivering excellence in every square foot since 2013.
             </p>
-            
-            {/* Social Links */}
-            {/* <div className="flex space-x-3">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  aria-label={social.label}
-                  className="w-10 h-10 bg-[#473727]/70 hover:bg-[#E8DCC8] rounded-lg flex items-center justify-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg group"
-                >
-                  <social.icon className="w-5 h-5 text-[#E8DCC8] group-hover:text-[#473727] transition-colors" />
-                </a>
-              ))}
-            </div> */}
+            <p className="section-label text-[#E8DCC8]/20">Est. 2013 · Bengaluru</p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-[#E8DCC8] font-bold text-base mb-5 relative inline-block">
-              Quick Links
-              <div className="absolute bottom-0 left-0 w-12 h-0.5 bg-[#E8DCC8]/70 -mb-2" />
-            </h4>
-            <ul className="space-y-2.5">
+            <p className="section-label text-[#E8DCC8]/35 mb-6">Quick Links</p>
+            <ul className="space-y-3">
               {quickLinks.map((link) => (
                 <li key={link.name}>
                   <a
                     href={link.href}
-                    className="flex items-center space-x-2 text-[#E8DCC8]/80 hover:text-[#E8DCC8] transition-colors duration-300 group text-sm"
+                    className="group flex items-center gap-2 text-[#E8DCC8]/45 hover:text-[#E8DCC8] transition-colors duration-300 text-sm"
                   >
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                    <span>{link.name}</span>
+                    <ArrowUpRight className="w-3 h-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                    <span className="group-hover:-translate-x-0 -translate-x-3 group-hover:translate-x-0 transition-transform duration-300">
+                      {link.name}
+                    </span>
                   </a>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Our Services */}
+          {/* Services */}
           <div>
-            <h4 className="text-[#E8DCC8] font-bold text-base mb-5 relative inline-block">
-              Our Services
-              <div className="absolute bottom-0 left-0 w-12 h-0.5 bg-[#E8DCC8]/70 -mb-2" />
-            </h4>
-            <ul className="space-y-2.5">
-              {services.map((service) => (
-                <li key={service}>
+            <p className="section-label text-[#E8DCC8]/35 mb-6">Services</p>
+            <ul className="space-y-3">
+              {services.map((s) => (
+                <li key={s}>
                   <a
-                    href="#services"
-                    className="flex items-center space-x-2 text-[#E8DCC8]/80 hover:text-[#E8DCC8] transition-colors duration-300 group text-sm"
+                    href="/#services"
+                    className="group flex items-center gap-2 text-[#E8DCC8]/45 hover:text-[#E8DCC8] transition-colors duration-300 text-sm"
                   >
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                    <span>{service}</span>
+                    <ArrowUpRight className="w-3 h-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                    <span className="-translate-x-3 group-hover:translate-x-0 transition-transform duration-300">
+                      {s}
+                    </span>
                   </a>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Contact Info */}
+          {/* Contact */}
           <div>
-            <h4 className="text-[#E8DCC8] font-bold text-base mb-5 relative inline-block">
-              Get In Touch
-              <div className="absolute bottom-0 left-0 w-12 h-0.5 bg-[#E8DCC8]/70 -mb-2" />
-            </h4>
-            <ul className="space-y-3.5">
+            <p className="section-label text-[#E8DCC8]/35 mb-6">Get In Touch</p>
+            <ul className="space-y-5">
               <li>
-                <a
-                  href="tel:+919945586527"
-                  className="flex items-start space-x-3 text-[#E8DCC8]/80 hover:text-[#E8DCC8] transition-colors duration-300 group"
-                >
-                  <Phone className="w-4 h-4 mt-0.5 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                <a href="tel:+919945586527" className="flex items-start gap-3 group">
+                  <Phone className="w-4 h-4 mt-0.5 flex-shrink-0 text-[#E8DCC8]/25 group-hover:text-[#E8DCC8]/60 transition-colors" />
                   <div>
-                    <p className="font-medium text-[#E8DCC8] text-sm">+91 9945586527</p>
-                    <p className="text-xs">Primary Contact</p>
+                    <p className="text-[#E8DCC8]/65 text-sm group-hover:text-[#E8DCC8] transition-colors">
+                      +91 9945586527
+                    </p>
+                    <p className="text-[#E8DCC8]/25 text-xs mt-0.5">Primary</p>
                   </div>
                 </a>
               </li>
               <li>
-                <a
-                  href="tel:+919538595685"
-                  className="flex items-start space-x-3 text-[#E8DCC8]/80 hover:text-[#E8DCC8] transition-colors duration-300 group"
-                >
-                  <Phone className="w-4 h-4 mt-0.5 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                <a href="tel:+919538595685" className="flex items-start gap-3 group">
+                  <Phone className="w-4 h-4 mt-0.5 flex-shrink-0 text-[#E8DCC8]/25 group-hover:text-[#E8DCC8]/60 transition-colors" />
                   <div>
-                    <p className="font-medium text-[#E8DCC8] text-sm">+91 9538595685</p>
-                    <p className="text-xs">Alternate Number</p>
+                    <p className="text-[#E8DCC8]/65 text-sm group-hover:text-[#E8DCC8] transition-colors">
+                      +91 9538595685
+                    </p>
+                    <p className="text-[#E8DCC8]/25 text-xs mt-0.5">Alternate</p>
                   </div>
                 </a>
               </li>
               <li>
-                <a
-                  href="mailto:svdeveloperblr@gmail.com"
-                  className="flex items-start space-x-3 text-[#E8DCC8]/80 hover:text-[#E8DCC8] transition-colors duration-300 group"
-                >
-                  <Mail className="w-4 h-4 mt-0.5 flex-shrink-0 group-hover:scale-110 transition-transform" />
-                  <div>
-                    <p className="font-medium text-[#E8DCC8] break-all text-sm">svdeveloperblr@gmail.com</p>
-                    <p className="text-xs">Email Us Anytime</p>
-                  </div>
+                <a href="mailto:svdevelopers.construct@gmail.com" className="flex items-start gap-3 group">
+                  <Mail className="w-4 h-4 mt-0.5 flex-shrink-0 text-[#E8DCC8]/25 group-hover:text-[#E8DCC8]/60 transition-colors" />
+                  <p className="text-[#E8DCC8]/65 text-sm group-hover:text-[#E8DCC8] transition-colors break-all">
+                    svdevelopers.construct@gmail.com
+                  </p>
                 </a>
               </li>
               <li>
@@ -162,13 +157,14 @@ export default function Footer() {
                   href="https://maps.google.com/?q=116,10th+Cross+Rd,Binnamangala,Indiranagar,Bengaluru,Karnataka+560038"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-start space-x-3 text-[#E8DCC8]/80 hover:text-[#E8DCC8] transition-colors duration-300 group"
+                  className="flex items-start gap-3 group"
                 >
-                  <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                  <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 text-[#E8DCC8]/25 group-hover:text-[#E8DCC8]/60 transition-colors" />
                   <div>
-                    <p className="font-medium text-[#E8DCC8] text-sm">116, 10th Cross Rd</p>
-                    <p className="text-xs">Binnamangala, Indiranagar</p>
-                    <p className="text-xs">Bengaluru - 560038</p>
+                    <p className="text-[#E8DCC8]/65 text-sm group-hover:text-[#E8DCC8] transition-colors">
+                      116, 10th Cross Rd
+                    </p>
+                    <p className="text-[#E8DCC8]/25 text-xs mt-0.5">Indiranagar, Bengaluru – 560038</p>
                   </div>
                 </a>
               </li>
@@ -176,29 +172,24 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="border-t border-[#473727]/50 mt-12 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <p className="text-[#E8DCC8]/70 text-sm text-center md:text-left">
-              © {currentYear} <span className="text-[#E8DCC8] font-semibold">SV Developers</span>. All rights reserved.
-            </p>
-            <div className="flex flex-wrap justify-center md:justify-end gap-6 text-sm">
-              <a href="#privacy" className="text-[#E8DCC8]/70 hover:text-[#E8DCC8] transition-colors">
-                Privacy Policy
+        {/* Bottom bar */}
+        <div className="border-t border-[#E8DCC8]/07 mt-14 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-[#E8DCC8]/25 text-xs text-center md:text-left tracking-wide">
+            © {year}{" "}
+            <span className="text-[#E8DCC8]/45">SV Developers &amp; Constructions</span>. All rights reserved.
+          </p>
+          <div className="flex gap-6 text-xs">
+            {["Privacy Policy", "Terms of Service", "Sitemap"].map((t) => (
+              <a key={t} href="#" className="text-[#E8DCC8]/25 hover:text-[#E8DCC8]/55 transition-colors">
+                {t}
               </a>
-              <a href="#terms" className="text-[#E8DCC8]/70 hover:text-[#E8DCC8] transition-colors">
-                Terms of Service
-              </a>
-              <a href="#sitemap" className="text-[#E8DCC8]/70 hover:text-[#E8DCC8] transition-colors">
-                Sitemap
-              </a>
-            </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Decorative Bottom Line */}
-      <div className="h-1 bg-[#E8DCC8]" />
+      {/* Bottom accent */}
+      <div className="h-px bg-[#473727]" />
     </footer>
   );
 }
