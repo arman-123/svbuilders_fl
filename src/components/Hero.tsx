@@ -261,7 +261,7 @@ export default function Hero() {
               fontWeight: 400,
             }}
           >
-            Crafting landmark spaces across Bengaluru<br />and Andhra Pradesh since 2013.
+            Crafting landmark spaces across Karnataka<br />and Andhra Pradesh since 2013.
           </p>
 
           {/* CTAs */}

@@ -12,6 +12,7 @@ const navItems = [
 export default function Header() {
   const [isOpen, setIsOpen]       = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [pastHero, setPastHero]   = useState(false);
   const [mounted, setMounted]     = useState(false);
 
   useEffect(() => {
@@ -20,7 +21,10 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 50);
+    const onScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+      setPastHero(window.scrollY > window.innerHeight * 0.7);
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -141,9 +145,10 @@ export default function Header() {
               fontFamily: "var(--font-body, Inter, sans-serif)",
               fontWeight: 500,
               textDecoration: "none",
-              opacity: mounted ? 1 : 0,
-              transform: mounted ? "none" : "translateY(-8px)",
-              transition: "opacity 0.7s ease 500ms, transform 0.7s ease 500ms",
+              opacity: mounted && pastHero ? 1 : 0,
+              transform: mounted && pastHero ? "none" : "translateY(-8px)",
+              pointerEvents: pastHero ? "auto" : "none",
+              transition: "opacity 0.5s ease, transform 0.5s ease",
             }}
           >
             Enquire
