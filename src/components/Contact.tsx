@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Mail, Phone, MapPin, Send, User, MessageSquare } from "lucide-react";
+import { Mail, Phone, MapPin, Send, User, MessageSquare, Instagram } from "lucide-react";
 
 const contactInfo = [
-
+  {
+    icon: Instagram,
+    title: "Follow Us",
+    info: "@svdevelopers",
+    subInfo: "DM us anytime",
+    link: "#",
+  },
   {
     icon: Phone,
     title: "Call Us",
