@@ -96,21 +96,21 @@ const PROJECTS: Project[] = [
   },
   {
     id: "vcenclave",
-    label: "Completed · Bengaluru",
+    label: "On Sale · Kolar",
     name: "VC Enclave",
-    subtitle: "Premium Residences",
+    subtitle: "Residential Layout, Kolar",
     description:
-      "A thoughtfully designed residential enclave by SV Developers — built with the same dedication to quality and craftsmanship that defines everything we do. Trusted by families who chose to live better.",
+      "A KUDA-approved residential layout spanning 58,729 sq.m in Honnenahalli Village, Kolar — just off NH-4 between Bengaluru and Mulbagal. 258 plots across four site dimensions, with 54% residential land, dedicated parks and civic amenities. Vaastu-compliant, clear-title plots ready for your dream home.",
     bgImage: "/vcenclave.jpg",
     sharpImage: "/vcenclave.jpg",
     stats: [
-      ["Premium", "Build Quality"],
-      ["Ready", "to Move"],
-      ["Vaastu", "Compliant"],
-      ["Est. 2013", "Legacy"],
+      ["258", "Total Plots"],
+      ["54.23%", "Residential Area"],
+      ["10.91%", "Parks & Green"],
+      ["KUDA", "Approved"],
     ],
     cta: { label: "Want to Know More About It?" },
-    locationLabel: "Completed · Bengaluru",
+    locationLabel: "On Sale · Kolar",
     hasDownload: false,
     hasEnquiry: true,
   },
@@ -391,21 +391,44 @@ export default function AuroraFeature() {
   const [current, setCurrent] = useState(0);
   const [animKeys, setAnimKeys] = useState<number[]>(PROJECTS.map((_, i) => (i === 0 ? 1 : 0)));
   const trackRef = useRef<HTMLDivElement>(null);
+  const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     setAnimKeys((prev) => prev.map((k, i) => (i === current ? k + 1 : k)));
   }, [current]);
 
-  /* drag-to-swipe */
-  const dragStart = useRef<number | null>(null);
-  function onPointerDown(e: React.PointerEvent) { dragStart.current = e.clientX; }
+  function resetAutoPlay() {
+    if (autoPlayRef.current) clearInterval(autoPlayRef.current);
+    autoPlayRef.current = setInterval(() => {
+      setCurrent((c) => (c + 1) % PROJECTS.length);
+    }, 5000);
+  }
+
+  useEffect(() => {
+    resetAutoPlay();
+    return () => { if (autoPlayRef.current) clearInterval(autoPlayRef.current); };
+  }, []);
+
+  /* drag-to-swipe with velocity detection */
+  const dragStart = useRef<{ x: number; t: number } | null>(null);
+  function onPointerDown(e: React.PointerEvent) {
+    dragStart.current = { x: e.clientX, t: Date.now() };
+  }
   function onPointerUp(e: React.PointerEvent) {
-    if (dragStart.current === null) return;
-    const delta = dragStart.current - e.clientX;
-    if (delta > 50) setCurrent((c) => Math.min(c + 1, PROJECTS.length - 1));
-    if (delta < -50) setCurrent((c) => Math.max(c - 1, 0));
+    if (!dragStart.current) return;
+    const dx = dragStart.current.x - e.clientX;
+    const dt = Date.now() - dragStart.current.t;
+    const velocity = Math.abs(dx) / Math.max(dt, 1);
+    if (dx > 40 || (dx > 10 && velocity > 0.3)) {
+      setCurrent((c) => (c + 1) % PROJECTS.length);
+      resetAutoPlay();
+    } else if (dx < -40 || (dx < -10 && velocity > 0.3)) {
+      setCurrent((c) => (c - 1 + PROJECTS.length) % PROJECTS.length);
+      resetAutoPlay();
+    }
     dragStart.current = null;
   }
+  function onPointerCancel() { dragStart.current = null; }
 
   function openModal() {
     setForm({ name: "", email: "", phone: "", countryCode: "+91" });
@@ -507,7 +530,7 @@ export default function AuroraFeature() {
       <section style={{ background: "#0f0d0a" }}>
 
         {/* ── Section header ── */}
-        <div className="container mx-auto px-5 sm:px-8 lg:px-10 pt-16 pb-10 flex items-end justify-between">
+        <div className="container mx-auto px-5 sm:px-8 lg:px-10 pt-16 pb-10">
           <Reveal>
             <p
               className="section-label font-body mb-3"
@@ -523,79 +546,83 @@ export default function AuroraFeature() {
                 letterSpacing: "0.09em",
                 lineHeight: 1,
                 color: CREAM,
-              
                 margin: 0,
               }}
             >
               Upcoming Projects
             </h2>
           </Reveal>
-
-          {/* Slide counter + arrows */}
-          <div className="flex items-center gap-5 pb-1">
-            <span
-              className="font-body hidden sm:block"
-              style={{ fontSize: "0.65rem", letterSpacing: "0.18em", color: "rgba(232,220,200,0.5)" }}
-            >
-              {String(current + 1).padStart(2, "0")} / {String(PROJECTS.length).padStart(2, "0")}
-            </span>
-            <button
-              onClick={() => setCurrent((c) => Math.max(c - 1, 0))}
-              disabled={current === 0}
-              aria-label="Previous project"
-              className="w-11 h-11 flex items-center justify-center border transition-colors duration-300"
-              style={{
-                borderColor: current === 0 ? "rgba(232,220,200,0.15)" : "rgba(232,220,200,0.4)",
-                color: current === 0 ? "rgba(232,220,200,0.2)" : CREAM,
-                background: "transparent",
-                cursor: current === 0 ? "default" : "pointer",
-              }}
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => setCurrent((c) => Math.min(c + 1, PROJECTS.length - 1))}
-              disabled={current === PROJECTS.length - 1}
-              aria-label="Next project"
-              className="w-11 h-11 flex items-center justify-center border transition-colors duration-300"
-              style={{
-                borderColor: current === PROJECTS.length - 1 ? "rgba(232,220,200,0.15)" : "rgba(232,220,200,0.4)",
-                color: current === PROJECTS.length - 1 ? "rgba(232,220,200,0.2)" : CREAM,
-                background: "transparent",
-                cursor: current === PROJECTS.length - 1 ? "default" : "pointer",
-              }}
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
         </div>
 
         {/* ── Carousel track ── */}
         <div
-          className="overflow-hidden select-none"
-          onPointerDown={onPointerDown}
-          onPointerUp={onPointerUp}
-          style={{ cursor: "grab", touchAction: "pan-y" }}
+          className="relative"
+          onMouseEnter={() => { if (autoPlayRef.current) clearInterval(autoPlayRef.current); }}
+          onMouseLeave={resetAutoPlay}
         >
           <div
-            ref={trackRef}
-            className="flex"
-            style={{
-              transform: `translateX(-${current * 100}%)`,
-              transition: `transform 0.65s ${ease}`,
-            }}
+            className="overflow-hidden select-none"
+            onPointerDown={onPointerDown}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerCancel}
+            style={{ cursor: "grab", touchAction: "pan-y" }}
           >
-            {PROJECTS.map((project, i) => (
-              <ProjectSlide
-                key={project.id}
-                project={project}
-                onDownload={openModal}
-                onEnquiry={openVcModal}
-                isActive={i === current}
-                animKey={animKeys[i]}
-              />
-            ))}
+            <div
+              ref={trackRef}
+              className="flex"
+              style={{
+                transform: `translateX(-${current * 100}%)`,
+                transition: `transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)`,
+              }}
+            >
+              {PROJECTS.map((project, i) => (
+                <ProjectSlide
+                  key={project.id}
+                  project={project}
+                  onDownload={openModal}
+                  onEnquiry={openVcModal}
+                  isActive={i === current}
+                  animKey={animKeys[i]}
+                />
+              ))}
+            </div>
           </div>
+
+          {/* Overlay prev arrow — vertically centred on the slide */}
+          <button
+            onClick={() => { setCurrent((c) => (c - 1 + PROJECTS.length) % PROJECTS.length); resetAutoPlay(); }}
+            aria-label="Previous project"
+            className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center transition-all duration-300"
+            style={{
+              background: "rgba(15,13,10,0.45)",
+              border: `1px solid rgba(232,220,200,0.25)`,
+              color: CREAM,
+              backdropFilter: "blur(4px)",
+              cursor: "pointer",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = `rgba(190,146,52,0.75)`; e.currentTarget.style.borderColor = GOLD; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(15,13,10,0.45)"; e.currentTarget.style.borderColor = "rgba(232,220,200,0.25)"; }}
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+
+          {/* Overlay next arrow — vertically centred on the slide */}
+          <button
+            onClick={() => { setCurrent((c) => (c + 1) % PROJECTS.length); resetAutoPlay(); }}
+            aria-label="Next project"
+            className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center transition-all duration-300"
+            style={{
+              background: "rgba(15,13,10,0.45)",
+              border: `1px solid rgba(232,220,200,0.25)`,
+              color: CREAM,
+              backdropFilter: "blur(4px)",
+              cursor: "pointer",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = `rgba(190,146,52,0.75)`; e.currentTarget.style.borderColor = GOLD; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(15,13,10,0.45)"; e.currentTarget.style.borderColor = "rgba(232,220,200,0.25)"; }}
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
         </div>
 
         {/* ── Dot indicators ── */}
@@ -603,7 +630,7 @@ export default function AuroraFeature() {
           {PROJECTS.map((p, i) => (
             <button
               key={p.id}
-              onClick={() => setCurrent(i)}
+              onClick={() => { setCurrent(i); resetAutoPlay(); }}
               aria-label={`Go to ${p.name}`}
               style={{
                 width: i === current ? 28 : 8,
