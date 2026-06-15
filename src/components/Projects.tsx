@@ -296,9 +296,9 @@ function ProjectModal({ project, onClose }: { project: Project | null; onClose: 
 
 // Unsplash images per category (CORS-safe for canvas use)
 const PORTAL_IMAGES: Record<CatKey, string> = {
-  luxury:      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80",
-  "mid-range": "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&q=80",
-  economical:  "https://images.unsplash.com/photo-1449844908441-8829872d2607?w=600&q=80",
+  luxury:      "/luxury.jpg",
+  "mid-range": "/premium.jpg",
+  economical:  "/residential.jpg",
 };
 
 function loadPortalImage(src: string): Promise<HTMLImageElement> {
