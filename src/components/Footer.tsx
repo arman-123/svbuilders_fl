@@ -143,7 +143,7 @@ export default function Footer() {
                     <p className="text-[#E8DCC8]/65 text-sm group-hover:text-[#E8DCC8] transition-colors">
                       +91 9538595685
                     </p>
-                    <p className="text-[#E8DCC8]/25 text-xs mt-0.5">Alternate</p>
+                    
                   </div>
                 </a>
               </li>

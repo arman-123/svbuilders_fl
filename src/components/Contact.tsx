@@ -72,7 +72,7 @@ export default function Contact() {
       `*Subject:* ${formData.subject}%0A%0A` +
       `*Message:*%0A${formData.message}`;
 
-    window.open(`https://wa.me/919945586527?text=${msg}`, "_blank");
+    window.open(`https://wa.me/919538595685?text=${msg}`, "_blank");
     setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
   };
 

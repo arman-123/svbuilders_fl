@@ -100,14 +100,15 @@ const PROJECTS: Project[] = [
     name: "VC Enclave",
     subtitle: "Residential Layout, Kolar",
     description:
-      "A KUDA-approved residential layout spanning 58,729 sq.m in Honnenahalli Village, Kolar — just off NH-4 between Bengaluru and Mulbagal. 258 plots across four site dimensions, with 54% residential land, dedicated parks and civic amenities. Vaastu-compliant, clear-title plots ready for your dream home.",
+      "A RERA & KUDA-approved residential layout spanning 58,729 sq.m in Honnenahalli Village, Kolar — just off NH-4 between Bengaluru and Mulbagal. 258 plots across four site dimensions, with 54% residential land, dedicated parks and civic amenities. Vaastu-compliant, clear-title plots ready for your dream home.",
     bgImage: "/vcenclave.jpg",
     sharpImage: "/vcenclave.jpg",
     stats: [
       ["258", "Total Plots"],
       ["54.23%", "Residential Area"],
+      ["16 acres", "Total Land"],
       ["10.91%", "Parks & Green"],
-      ["KUDA", "Approved"],
+      ["RERA & KUDA", "Approved"],
     ],
     cta: { label: "Want to Know More About It?" },
     locationLabel: "On Sale · Kolar",
