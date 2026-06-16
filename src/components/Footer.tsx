@@ -157,7 +157,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="https://maps.google.com/?q=116,10th+Cross+Rd,Binnamangala,Indiranagar,Bengaluru,Karnataka+560038"
+                  href="https://maps.app.goo.gl/wU2sxfTh5KKTz1B7A"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-start gap-3 group"
@@ -165,7 +165,7 @@ export default function Footer() {
                   <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 text-[#E8DCC8]/25 group-hover:text-[#E8DCC8]/60 transition-colors" />
                   <div>
                     <p className="text-[#E8DCC8]/65 text-sm group-hover:text-[#E8DCC8] transition-colors">
-                      116, 10th Cross Rd
+                      SV developers, 1st Floor, No. 17, 1st Main Rd, HAL 2nd Stage,
                     </p>
                     <p className="text-[#E8DCC8]/25 text-xs mt-0.5">Indiranagar, Bengaluru – 560038</p>
                   </div>

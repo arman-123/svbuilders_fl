@@ -2,16 +2,28 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import nodemailer from "nodemailer";
 import { env } from "../config/env.js";
+import { getProject } from "../config/projects.js";
 
 let transporter: nodemailer.Transporter | null = null;
+let smtpWarningLogged = false;
 
-function getTransporter(): nodemailer.Transporter {
+function getTransporter(): nodemailer.Transporter | null {
   if (transporter) return transporter;
+  if (!env.smtp.pass) {
+    if (!smtpWarningLogged) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        "[EmailService] SMTP_PASS is not set — email sending is disabled. Leads are still saved."
+      );
+      smtpWarningLogged = true;
+    }
+    return null;
+  }
   transporter = nodemailer.createTransport({
     host: env.smtp.host,
     port: env.smtp.port,
     secure: env.smtp.secure,
-    auth: env.smtp.user ? { user: env.smtp.user, pass: env.smtp.pass } : undefined,
+    auth: { user: env.smtp.user, pass: env.smtp.pass },
   });
   return transporter;
 }
@@ -23,23 +35,55 @@ interface SendArgs {
 }
 
 /**
- * Sends the brochure email with the PDF attached.
- * Throws on failure so the caller can decide how to respond — the lead is
- * already persisted, so a mail failure must not lose the record.
+ * Sends the brochure PDF to the lead.
+ * Returns true on success, false when SMTP is unconfigured or sending fails.
+ * Does NOT throw — lead capture must never fail because of mail.
  */
-export async function sendBrochureEmail({ to, name, project }: SendArgs): Promise<void> {
-  const brochure = resolve(env.brochurePath);
-  const attachments = existsSync(brochure)
-    ? [{ filename: `${project}-Brochure.pdf`, path: brochure }]
+export async function sendBrochureEmail({ to, name, project }: SendArgs): Promise<boolean> {
+  const transport = getTransporter();
+  if (!transport) return false;
+
+  const cfg = getProject(project);
+  const brochurePath = resolve(cfg.brochurePath);
+  const attachments = existsSync(brochurePath)
+    ? [{ filename: `${cfg.name}-Brochure.pdf`, path: brochurePath }]
     : [];
 
-  await getTransporter().sendMail({
+  await transport.sendMail({
     from: env.smtp.from,
     to,
-    subject: `${project} Project Brochure`,
-    text: `Dear ${name},\n\nThank you for your interest in ${project}. Please find the brochure attached.\n\nWarm regards,\nSV Developers & Constructions`,
-    html: brochureHtml(name, project),
+    subject: `${cfg.name} — Project Brochure`,
+    text: `Dear ${name},\n\nThank you for your interest in ${cfg.name}. Please find the brochure attached.\n\nWarm regards,\nSV Developers & Constructions`,
+    html: brochureHtml(name, cfg.name),
     attachments,
+  });
+  return true;
+}
+
+/**
+ * Notifies the internal sales team whenever a new lead is captured.
+ * Silently skips if SMTP is not configured.
+ */
+export async function sendInternalLeadNotification({
+  name,
+  email,
+  phone,
+  project,
+}: {
+  name: string;
+  email: string;
+  phone: string;
+  project: string;
+}): Promise<void> {
+  const transport = getTransporter();
+  if (!transport) return;
+
+  await transport.sendMail({
+    from: env.smtp.from,
+    to: env.internalNotifyEmail,
+    subject: `New Lead: ${project} — ${name}`,
+    text: `A new brochure request was submitted.\n\nName: ${name}\nEmail: ${email}\nPhone: ${phone}\nProject: ${project}\nTime: ${new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}`,
+    html: internalLeadHtml({ name, email, phone, project }),
   });
 }
 
@@ -59,5 +103,25 @@ function brochureHtml(name: string, project: string): string {
     <p style="font-size:15px;line-height:1.7;margin:0;color:#473727;">
       Warm regards,<br/><strong>SV Developers &amp; Constructions</strong><br/>Hoskote, Bangalore
     </p>
+  </div>`;
+}
+
+function internalLeadHtml(lead: {
+  name: string;
+  email: string;
+  phone: string;
+  project: string;
+}): string {
+  const time = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+  return `
+  <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#fff;border:1px solid #e0d9d0;">
+    <h2 style="margin:0 0 16px;color:#473727;">New Lead — ${lead.project}</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:15px;">
+      <tr><td style="padding:8px 0;color:#888;width:90px;">Name</td><td style="padding:8px 0;font-weight:600;">${lead.name}</td></tr>
+      <tr><td style="padding:8px 0;color:#888;">Email</td><td style="padding:8px 0;">${lead.email}</td></tr>
+      <tr><td style="padding:8px 0;color:#888;">Phone</td><td style="padding:8px 0;">${lead.phone}</td></tr>
+      <tr><td style="padding:8px 0;color:#888;">Project</td><td style="padding:8px 0;">${lead.project}</td></tr>
+      <tr><td style="padding:8px 0;color:#888;">Time</td><td style="padding:8px 0;">${time}</td></tr>
+    </table>
   </div>`;
 }

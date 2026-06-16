@@ -17,13 +17,9 @@ export const env = {
     .split(",")
     .map((s) => s.trim()),
 
-  google: {
-    sheetId: process.env.GOOGLE_SHEET_ID ?? "",
-    // Service-account credentials. The private key is stored with literal "\n"
-    // in .env, so we unescape it back to real newlines here.
-    clientEmail: process.env.GOOGLE_CLIENT_EMAIL ?? "",
-    privateKey: (process.env.GOOGLE_PRIVATE_KEY ?? "").replace(/\\n/g, "\n"),
-    sheetName: process.env.GOOGLE_SHEET_NAME ?? "Leads",
+  appsScript: {
+    url: process.env.APPS_SCRIPT_URL ?? "",
+    secret: process.env.APPS_SCRIPT_SECRET ?? "",
   },
 
   jwtSecret: required("JWT_SECRET", "dev-insecure-secret-change-me"),
@@ -39,5 +35,6 @@ export const env = {
     from: process.env.MAIL_FROM ?? "SV Developers <marketing@svdevelopers.in>",
   },
 
-  brochurePath: process.env.BROCHURE_PATH ?? "./assets/aurora-brochure.pdf",
+  internalNotifyEmail:
+    process.env.INTERNAL_NOTIFY_EMAIL ?? "marketing@svdevelopers.in",
 };

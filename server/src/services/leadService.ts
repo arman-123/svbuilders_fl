@@ -1,26 +1,24 @@
-import * as sheets from "./sheetsService.js";
-import type { SheetLead } from "./sheetsService.js";
+import { leadRepository } from "./appsScriptRepository.js";
+import type { Lead } from "../types/index.js";
 import type { BrochureLeadInput } from "../validators/lead.js";
 
-/** Window (minutes) within which a repeat email+project submission is treated as duplicate spam. */
-const DUPLICATE_WINDOW_MIN = 30;
+export type { Lead };
 
-export type Lead = SheetLead;
-
-export async function isDuplicate(email: string, project: string): Promise<boolean> {
-  return sheets.isDuplicate(email, project, DUPLICATE_WINDOW_MIN);
-}
-
-export async function createLead(
+export async function submitLead(
   input: BrochureLeadInput,
   ip: string | null
-): Promise<Lead> {
-  return sheets.appendLead(
-    { name: input.name, email: input.email, phone: input.phone, project: input.project },
+): Promise<{ lead: Lead; duplicate: boolean }> {
+  return leadRepository.submit(
+    {
+      name: input.name,
+      email: input.email,
+      phone: input.phone,
+      project: input.project,
+    },
     ip
   );
 }
 
 export async function listLeads(): Promise<Lead[]> {
-  return sheets.listLeads();
+  return leadRepository.list();
 }

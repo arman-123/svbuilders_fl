@@ -1,12 +1,13 @@
 import { z } from "zod";
 
-// Strip ASCII control characters (0x00-0x1F and 0x7F) and trim, to mitigate
-// header-injection / whitespace abuse before validation runs.
 const CONTROL_CHARS = new RegExp("[\\x00-\\x1F\\x7F]", "g");
 const stripControl = (s: string) => s.replace(CONTROL_CHARS, "").trim();
 
 const sanitized = (max: number) =>
-  z.string().transform(stripControl).pipe(z.string().min(1).max(max));
+  z
+    .string()
+    .transform(stripControl)
+    .pipe(z.string().min(1).max(max));
 
 export const brochureLeadSchema = z.object({
   name: sanitized(120).pipe(z.string().min(2, "Name is too short")),
@@ -14,7 +15,7 @@ export const brochureLeadSchema = z.object({
   phone: z
     .string()
     .transform((s) => s.replace(/[^\d+]/g, ""))
-    .pipe(z.string().regex(/^(\+?\d{1,3})?\d{10}$/, "Invalid mobile number")),
+    .pipe(z.string().min(7).max(18, "Invalid phone number")),
   project: sanitized(80).optional().default("Aurora"),
 });
 
