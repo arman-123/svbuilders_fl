@@ -907,7 +907,7 @@ function CategoryView({ category, onBack, onProjectClick, onProjectHover }: {
         <div ref={gridRef} style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(min(300px,100%),1fr))",gap:2,background:"rgba(71,55,39,0.08)" }}>
           {catProjects.map((p,i) => (
             <div key={p.id} className="cproj"
-              onClick={()=>{ if (!isMobile) onProjectClick(p); }}
+              onClick={()=>onProjectClick(p)}
               onMouseEnter={()=>{ if (!isMobile) onProjectHover(p); }}
               onMouseLeave={()=>{ if (!isMobile) onProjectHover(null); }}
               onTouchStart={()=>{ if (!isMobile) onProjectHover(p); }}
