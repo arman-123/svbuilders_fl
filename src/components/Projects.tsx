@@ -421,16 +421,13 @@ function HouseScene({ onEnterCategory }: { onEnterCategory: (cat: CatKey) => voi
 
       const scene  = new THREE.Scene();
       const BASE_FOV = 46;
-      // On portrait screens (aspect < 1) the horizontal FOV shrinks and the
-      // side portals get clipped — widen the vertical FOV so the effective
-      // horizontal FOV matches what it'd be at aspect 1. Landscape/desktop
-      // (aspect >= 1) keeps the original FOV untouched.
+      // On narrow/portrait screens the portals stack vertically (see LAYOUTS
+      // below) instead of side-by-side, so they need a taller vertical FOV to
+      // stay in view. Landscape/desktop (aspect >= 1) keeps the original FOV
+      // completely untouched.
+      const NARROW_FOV = 72;
       function fovForAspect(aspect: number): number {
-        if (aspect >= 1) return BASE_FOV;
-        const baseHalfRad = (BASE_FOV * Math.PI / 180) / 2;
-        const desiredHorizHalf = Math.atan(Math.tan(baseHalfRad) * 1);
-        const newVHalf = Math.atan(Math.tan(desiredHorizHalf) / aspect);
-        return (newVHalf * 2) * 180 / Math.PI;
+        return aspect >= 1 ? BASE_FOV : NARROW_FOV;
       }
       const camera = new THREE.PerspectiveCamera(fovForAspect(W / H), W / H, 0.1, 3000);
       camera.position.set(0, 30, 820);
@@ -493,11 +490,26 @@ function HouseScene({ onEnterCategory }: { onEnterCategory: (cat: CatKey) => voi
       // Camera is at (0, 30, 820). lookAt for non-camera Object3D makes +z face target.
       const LOOK_AT = new THREE.Vector3(0, 30, 820);
 
-      const PORTAL_DEFS: { key: CatKey; pos: [number,number,number] }[] = [
-        { key: "luxury",     pos: [-255, 15, 340] },
-        { key: "mid-range",  pos: [   0, 15, 365] },
-        { key: "economical", pos: [ 255, 15, 340] },
-      ];
+      // Desktop/landscape (aspect >= 1): unchanged 3-column layout.
+      // Narrow/portrait (aspect < 1, e.g. phones or a squeezed window): the
+      // portals stack vertically instead so all three stay visible.
+      const LAYOUTS: Record<"wide" | "narrow", Record<CatKey, [number,number,number]>> = {
+        wide: {
+          luxury:      [-255, 15, 340],
+          "mid-range": [   0, 15, 365],
+          economical:  [ 255, 15, 340],
+        },
+        narrow: {
+          luxury:      [0, 195, 360],
+          "mid-range": [0,  15, 380],
+          economical:  [0,-165, 360],
+        },
+      };
+      let layoutMode: "wide" | "narrow" = (W / H) < 1 ? "narrow" : "wide";
+
+      const PORTAL_DEFS: { key: CatKey; pos: [number,number,number] }[] = (
+        ["luxury", "mid-range", "economical"] as CatKey[]
+      ).map(key => ({ key, pos: LAYOUTS[layoutMode][key] }));
       const PW = 170, PH = 240; // 510:720 canvas ratio
 
       type Portal = {
@@ -619,6 +631,19 @@ function HouseScene({ onEnterCategory }: { onEnterCategory: (cat: CatKey) => voi
       const onRz = () => {
         W = container.clientWidth; H = container.clientHeight;
         renderer.setSize(W,H); camera.aspect=W/H; camera.fov=fovForAspect(W/H); camera.updateProjectionMatrix();
+        const newMode: "wide" | "narrow" = (W / H) < 1 ? "narrow" : "wide";
+        if (newMode !== layoutMode) {
+          layoutMode = newMode;
+          portals.forEach(p => {
+            const pos = LAYOUTS[layoutMode][p.key];
+            p.basePos = pos;
+            gsap.to(p.group.position, {
+              x: pos[0], y: pos[1] + (p.hovered ? 12 : 0), z: pos[2],
+              duration: 0.6, ease: "power2.out",
+              onUpdate: () => p.group.lookAt(LOOK_AT),
+            });
+          });
+        }
       };
 
       container.addEventListener("mousedown", onMD);
@@ -883,10 +908,10 @@ function CategoryView({ category, onBack, onProjectClick, onProjectHover }: {
           {catProjects.map((p,i) => (
             <div key={p.id} className="cproj"
               onClick={()=>{ if (!isMobile) onProjectClick(p); }}
-              onMouseEnter={()=>onProjectHover(p)}
-              onMouseLeave={()=>onProjectHover(null)}
-              onTouchStart={()=>onProjectHover(p)}
-              onTouchEnd={()=>setTimeout(()=>onProjectHover(null),350)}
+              onMouseEnter={()=>{ if (!isMobile) onProjectHover(p); }}
+              onMouseLeave={()=>{ if (!isMobile) onProjectHover(null); }}
+              onTouchStart={()=>{ if (!isMobile) onProjectHover(p); }}
+              onTouchEnd={()=>{ if (!isMobile) setTimeout(()=>onProjectHover(null),350); }}
               style={{ background:"#FCFAF5",cursor:"pointer",overflow:"hidden",transition:"background .4s var(--ease-lux)" }}
             >
               <div style={{ width:"100%",aspectRatio:"4/3",overflow:"hidden",background:"rgba(71,55,39,0.06)" }}>
