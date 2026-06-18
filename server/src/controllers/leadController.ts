@@ -32,7 +32,8 @@ export async function downloadBrochure(
 
     // Fire emails in the background — don't block the response.
     Promise.allSettled([
-      sendBrochureEmail({ to: lead.email, name: lead.name, project: lead.project }),
+      // sendBrochureEmail({ to: lead.email, name: lead.name, project: lead.project }),
+      Promise.resolve({ status: "fulfilled", value: true }),
       sendInternalLeadNotification({
         name: lead.name,
         email: lead.email,
