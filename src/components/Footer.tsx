@@ -168,7 +168,7 @@ export default function Footer() {
                   <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 text-[#E8DCC8]/25 group-hover:text-[#E8DCC8]/60 transition-colors" />
                   <div>
                     <p className="text-[#E8DCC8]/65 text-sm group-hover:text-[#E8DCC8] transition-colors">
-                      SV developers, 1st Floor, 116, 10th Cross Rd, Binnamangala, Hoysala Nagar,
+                      SV developers, 1st Floor,116, 10th Cross Rd, Binnamangala, Hoysala Nagar, Indiranagar, Bengaluru, Karnataka 560038
                     </p>
                     <p className="text-[#E8DCC8]/25 text-xs mt-0.5">Indiranagar, Bengaluru – 560038</p>
                   </div>
