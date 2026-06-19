@@ -5,9 +5,9 @@ const contactInfo = [
   {
     icon: Instagram,
     title: "Follow Us",
-    info: "@svdevelopers",
+    info: "@svdevelopersofficial",
     subInfo: "DM us anytime",
-    link: "#",
+    link: "https://www.instagram.com/svdevelopersofficial/",
   },
   {
     icon: Phone,
@@ -21,7 +21,7 @@ const contactInfo = [
     title: "Email Us",
     info: "marketing@svdevelopers.in",
     subInfo: "Reply within 24 hours",
-    link: "marketing@svdevelopers.in",
+    link: "mailto:marketing@svdevelopers.in",
   },
   {
     icon: MapPin,
